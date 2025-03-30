@@ -59,6 +59,20 @@ add_pack(THING *obj, bool silent)
     else
     {
 	lp = NULL;
+	switch (obj->o_type)
+	{
+		case SCROLL:
+		set_know(obj, scr_info);
+		when POTION:
+		set_know(obj, pot_info);
+	when STICK:
+		set_know(obj, ws_info);
+		when WEAPON:
+		case ARMOR:
+		obj->o_flags |= ISKNOW;
+		when RING:
+		set_know(obj, ring_info);
+	}
 	for (op = pack; op != NULL; op = next(op))
 	{
 	    if (op->o_type != obj->o_type)
