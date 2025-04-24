@@ -14,6 +14,7 @@
 #include <curses.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h> // Include for file operations
 #include "rogue.h"
 
 /*
@@ -24,8 +25,46 @@ void
 init_player()
 {
     register THING *obj;
+    FILE *stats_file;
+    int initial_str = 0, initial_exp = 0, initial_lvl = 0, initial_arm = 0, initial_hpt = 0, initial_maxhp = 0;
+    bool loaded_stats = FALSE;
 
-    pstats = max_stats;
+    // Try to load stats from stats.txt
+    stats_file = fopen("stats.txt", "r");
+    if (stats_file != NULL) {
+        if (fscanf(stats_file, "%d\n%d\n%d\n%d\n%d\n%d",
+                   &initial_str, &initial_exp, &initial_lvl, &initial_arm, &initial_hpt, &initial_maxhp) == 6)
+        {
+            // Assign loaded stats, ensuring they are within reasonable bounds if necessary
+            // For now, directly assign. Add validation later if needed.
+            pstats.s_str = (str_t)initial_str; // Cast to str_t
+            pstats.s_exp = initial_exp;
+            pstats.s_lvl = initial_lvl;
+            pstats.s_arm = initial_arm;
+            pstats.s_hpt = initial_hpt;
+            pstats.s_maxhp = initial_maxhp;
+            // Keep default damage string for now
+            strncpy(pstats.s_dmg, max_stats.s_dmg, sizeof(pstats.s_dmg) - 1);
+            pstats.s_dmg[sizeof(pstats.s_dmg) - 1] = '\0';
+
+            loaded_stats = TRUE;
+            // Optionally, add a message indicating stats were loaded
+            // msg("Loaded stats from stats.txt");
+        } else {
+            // Handle file format error - use defaults
+            // msg("Error reading stats.txt, using defaults.");
+        }
+        fclose(stats_file);
+    } else {
+        // Handle file not found - use defaults
+        // msg("stats.txt not found, using defaults.");
+    }
+
+    // If stats weren't loaded, use defaults
+    if (!loaded_stats) {
+        pstats = max_stats;
+    }
+
     food_left = HUNGERTIME;
     /*
      * Give him some food
