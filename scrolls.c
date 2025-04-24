@@ -310,8 +310,6 @@ def:
     look(TRUE);	/* put the result of the scroll on the screen */
     status();
 
-    call_it(&scr_info[obj->o_which]);
-
     if (discardit)
 	discard(obj);
 }
